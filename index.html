@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neo Market</title>
+
+<style>
+body { margin:0; font-family: Arial, sans-serif; background:#111; color:#fff;}
+h1,h2,h3 { font-family: Georgia, serif;}
+a { text-decoration:none; color:white;}
+.container { padding:20px; }
+
+nav {
+  display:flex; justify-content:space-between;
+  padding:15px 20px; background:#000; position:sticky; top:0;
+}
+nav a { margin:0 10px; }
+
+.hero {
+  padding:60px; text-align:center;
+  background:url('https://images.unsplash.com/photo-1503376780353-7e6692767b70') center/cover;
+}
+.hero h1 { font-size:40px; }
+
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+}
+
+.card {
+  background:#1c1c1c; padding:10px; border-radius:10px;
+  transition:0.3s;
+}
+.card:hover { transform:scale(1.03); }
+.card img { width:100%; height:150px; object-fit:cover; }
+
+button {
+  padding:8px 12px; border:none;
+  background:#ff6600; color:white; cursor:pointer;
+}
+
+input,textarea {
+  width:100%; padding:8px; margin:5px 0;
+}
+
+</style>
+</head>
+
+<body>
+
+<nav>
+  <div><a href="#">Neo Market</a></div>
+  <div>
+    <a href="#">Home</a>
+    <a href="#cart">Cart (<span id="cartCount">0</span>)</a>
+  </div>
+</nav>
+
+<div id="app"></div>
+
+<script>
+
+// CONFIG
+const CONFIG = {
+  store: "Neo Market",
+  tagline: "Premium Car Accessories",
+  formspree: "https://formspree.io/f/xvzvkvod",
+  currency: "₹"
+};
+
+// PRODUCTS
+const PRODUCTS = [
+{ id:1,name:"Car Vacuum Cleaner",price:999,category:"Cleaning",description:"Powerful mini vacuum",images:["https://images.unsplash.com/photo-1602524813662"],stock:10 },
+{ id:2,name:"Microfiber Cloth Set",price:299,category:"Cleaning",description:"Soft cleaning cloth",images:["https://images.unsplash.com/photo-1581578731548"],stock:20 },
+{ id:3,name:"Car Polish Wax",price:499,category:"Detailing",description:"Shiny finish wax",images:["https://images.unsplash.com/photo-1619767886558"],stock:15 },
+{ id:4,name:"Tyre Shine Spray",price:399,category:"Detailing",description:"Glossy tyres",images:["https://images.unsplash.com/photo-1625047509168"],stock:12 },
+{ id:5,name:"Dashboard Cleaner",price:350,category:"Cleaning",description:"Clean dashboard",images:["https://images.unsplash.com/photo-1607860108855"],stock:10 },
+{ id:6,name:"Car Perfume",price:199,category:"Accessories",description:"Fresh fragrance",images:["https://images.unsplash.com/photo-1628177142898"],stock:25 },
+{ id:7,name:"Seat Covers",price:1999,category:"Accessories",description:"Premium seat cover",images:["https://images.unsplash.com/photo-1583267746897"],stock:8 },
+{ id:8,name:"Car Phone Holder",price:299,category:"Accessories",description:"Dashboard holder",images:["https://images.unsplash.com/photo-1585386959984"],stock:30 },
+{ id:9,name:"LED Headlight",price:1499,category:"Lighting",description:"Bright LED",images:["https://images.unsplash.com/photo-1605559424843"],stock:10 },
+{ id:10,name:"Car Shampoo",price:399,category:"Cleaning",description:"Foam wash",images:["https://images.unsplash.com/photo-1619767886600"],stock:15 },
+{ id:11,name:"Pressure Washer",price:4999,category:"Cleaning",description:"High pressure washer",images:["https://images.unsplash.com/photo-1581090700227"],stock:5 },
+{ id:12,name:"Car Cover",price:999,category:"Accessories",description:"Waterproof cover",images:["https://images.unsplash.com/photo-1571607388263"],stock:10 },
+{ id:13,name:"Steering Cover",price:399,category:"Accessories",description:"Grip cover",images:["https://images.unsplash.com/photo-1583267746897"],stock:20 },
+{ id:14,name:"Interior Brush",price:199,category:"Cleaning",description:"Detail brush",images:["https://images.unsplash.com/photo-1619767886602"],stock:25 },
+{ id:15,name:"Glass Cleaner",price:299,category:"Cleaning",description:"Clear glass",images:["https://images.unsplash.com/photo-1581578731548"],stock:20 },
+{ id:16,name:"Air Compressor",price:1999,category:"Tools",description:"Tyre inflator",images:["https://images.unsplash.com/photo-1581092335397"],stock:7 },
+{ id:17,name:"Car Toolkit",price:999,category:"Tools",description:"Emergency tools",images:["https://images.unsplash.com/photo-1581092335399"],stock:10 },
+{ id:18,name:"Wheel Brush",price:249,category:"Cleaning",description:"Wheel cleaning",images:["https://images.unsplash.com/photo-1619767886603"],stock:18 },
+{ id:19,name:"Clay Bar Kit",price:599,category:"Detailing",description:"Smooth paint",images:["https://images.unsplash.com/photo-1619767886604"],stock:12 },
+{ id:20,name:"Scratch Remover",price:499,category:"Detailing",description:"Remove scratches",images:["https://images.unsplash.com/photo-1619767886605"],stock:10 },
+{ id:21,name:"Car Vacuum Pro",price:1999,category:"Cleaning",description:"Heavy duty vacuum",images:["https://images.unsplash.com/photo-1602524813662"],stock:8 },
+{ id:22,name:"Wax Applicator",price:199,category:"Detailing",description:"Easy wax apply",images:["https://images.unsplash.com/photo-1619767886606"],stock:20 },
+{ id:23,name:"Headlight Restorer",price:599,category:"Detailing",description:"Restore lights",images:["https://images.unsplash.com/photo-1619767886607"],stock:10 },
+{ id:24,name:"Car Organizer",price:499,category:"Accessories",description:"Storage bag",images:["https://images.unsplash.com/photo-1583267746897"],stock:15 },
+{ id:25,name:"Magnetic Phone Mount",price:299,category:"Accessories",description:"Magnetic holder",images:["https://images.unsplash.com/photo-1585386959984"],stock:30 }
+];
+
+// CART
+let cart = JSON.parse(localStorage.getItem("neo_cart")) || [];
+
+function saveCart() {
+  localStorage.setItem("neo_cart", JSON.stringify(cart));
+  document.getElementById("cartCount").innerText = cart.length;
+}
+
+// ROUTER
+window.onhashchange = render;
+
+function render() {
+  const route = location.hash || "#";
+
+  if(route.startsWith("#product-")) {
+    productPage(route.split("-")[1]);
+  } else if(route === "#cart") {
+    cartPage();
+  } else if(route === "#checkout") {
+    checkoutPage();
+  } else {
+    homePage();
+  }
+}
+
+// HOME
+function homePage() {
+  let html = `
+  <div class="hero">
+    <h1>${CONFIG.store}</h1>
+    <p>${CONFIG.tagline}</p>
+  </div>
+  <div class="container">
+  <div class="grid">
+  `;
+
+  PRODUCTS.forEach(p => {
+    const inCart = cart.find(i=>i.id===p.id);
+    html += `
+    <div class="card">
+      <img src="${p.images[0]}">
+      <h3>${p.name}</h3>
+      <p>${CONFIG.currency}${p.price}</p>
+      <button onclick="location.hash='#product-${p.id}'">View</button>
+      <button onclick="addToCart(${p.id})">
+        ${inCart ? "In Cart" : "Add to Cart"}
+      </button>
+    </div>`;
+  });
+
+  html += `</div></div>`;
+  app.innerHTML = html;
+}
+
+// PRODUCT PAGE
+function productPage(id) {
+  const p = PRODUCTS.find(x=>x.id==id);
+  app.innerHTML = `
+  <div class="container">
+    <h2>${p.name}</h2>
+    <img src="${p.images[0]}" style="width:100%">
+    <p>${p.description}</p>
+    <h3>${CONFIG.currency}${p.price}</h3>
+    <button onclick="addToCart(${p.id})">Add to Cart</button>
+  </div>`;
+}
+
+// CART PAGE
+function cartPage() {
+  let html = `<div class="container"><h2>Cart</h2>`;
+  let total = 0;
+
+  cart.forEach(item=>{
+    total += item.price;
+    html += `
+    <p>${item.name} - ${CONFIG.currency}${item.price}
+    <button onclick="remove(${item.id})">Remove</button></p>`;
+  });
+
+  html += `<h3>Total: ${CONFIG.currency}${total}</h3>
+  <a href="#checkout"><button>Checkout</button></a>
+  </div>`;
+
+  app.innerHTML = html;
+}
+
+// CHECKOUT
+function checkoutPage() {
+  app.innerHTML = `
+  <div class="container">
+  <h2>Checkout</h2>
+  <form action="${CONFIG.formspree}" method="POST" onsubmit="clearCart()">
+    <input name="name" placeholder="Name" required>
+    <input name="email" placeholder="Email" required>
+    <input name="phone" placeholder="Phone" required>
+    <textarea name="address" placeholder="Address"></textarea>
+    <textarea name="order" hidden>${JSON.stringify(cart)}</textarea>
+    <button type="submit">Place Order</button>
+  </form>
+  </div>`;
+}
+
+// FUNCTIONS
+function addToCart(id) {
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!cart.find(i=>i.id===id)) cart.push(p);
+  saveCart();
+  render();
+}
+
+function remove(id) {
+  cart = cart.filter(i=>i.id!==id);
+  saveCart();
+  render();
+}
+
+function clearCart() {
+  setTimeout(()=>{
+    cart=[];
+    saveCart();
+    location.hash="#";
+  },3000);
+}
+
+// INIT
+saveCart();
+render();
+
+</script>
+
+</body>
+</html>
